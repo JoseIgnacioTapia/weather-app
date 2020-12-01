@@ -4,26 +4,28 @@ const details = document.querySelector('.details');
 const time = document.querySelector('img.time');
 const icon = document.querySelector('.icon img');
 
-const updateUI = (data) => {
+const forecast = new Forecast();
 
+const updateUI = (data) => {
+  
   // destructure properties
   const { cityDets, weather } = data;
 
   // update details template
   details.innerHTML = `
     <h5 class="my-3">${cityDets.EnglishName}</h5>
-    <div class="my-3">${weather[0].WeatherText}</div>
+    <div class="my-3">${weather.WeatherText}</div>
     <div class="display-4 my-4">
-      <span>${weather[0].Temperature.Metric.Value}</span>
+      <span>${weather.Temperature.Metric.Value}</span>
       <span>&deg;C</span>
     </div>
   `;
 
   // update the night/day & icon images
-  let timeSrc = weather[0].IsDayTime ? 'img/day.svg' : 'img/night.svg';
+  let timeSrc = weather.IsDayTime ? 'img/day.svg' : 'img/night.svg';
   time.setAttribute('src', timeSrc);
 
-  const iconSrc = `img/icons/${weather[0].WeatherIcon}.svg`;
+  const iconSrc = `img/icons/${weather.WeatherIcon}.svg`;
   icon.setAttribute('src', iconSrc);
 
   // remove the d-none class if present
@@ -31,14 +33,6 @@ const updateUI = (data) => {
     card.classList.remove('d-none');
   }
 
-};
-
-const updateCity = async (city) => {
-  
-  const cityDets = await getCity(city);
-  const weather = await getWeather(cityDets.Key);
-
-  return { cityDets, weather };  // Object Shorthand Notation
 };
 
 cityForm.addEventListener('submit', e => {
@@ -50,7 +44,7 @@ cityForm.addEventListener('submit', e => {
   cityForm.reset();
 
   // update the ui with new city
-  updateCity(city)
+  forecast.updateCity(city)
     .then(data => updateUI(data))
     .catch(err => console.log(err));
 
@@ -60,7 +54,8 @@ cityForm.addEventListener('submit', e => {
 });
 
 if (localStorage.getItem('city')) {
-  updateCity(localStorage.getItem('city'))
+  forecast.updateCity(localStorage.getItem('city'))
     .then(data => updateUI(data))
     .catch(err => console.log(err));
 }
+
